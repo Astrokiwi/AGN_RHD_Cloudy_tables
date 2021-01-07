@@ -1,20 +1,19 @@
-
-c === DEFINE CONTINUUM ===
-c
+# === DEFINE CONTINUUM ===
+#
 AGN 5.5 -1.40 -0.50 -1.0
 Intensity {I:.2f} range total
-c
-c === fUV radiation field in 1000 G0 (Habing unit) === 
+#
+# === fUV radiation field in 1000 G0 (Habing unit) ===
 blackbody 30000 K
 intensity {g:.2f}, range 0.1 to 0.38 Ryd
 extinguish by 24, leakage = 0
-c
-c === (2) DEFINE PROPERTIES OF CLOUD ===
-c
+#
+# === (2) DEFINE PROPERTIES OF CLOUD ===
+#
 hden {n} 
 abundances ism no grains
 grains ism function sublimation
-c
+#
 CMB
 COSMIC RAYS BACKGROUND
 constant gas temperature {temp} log 
@@ -22,8 +21,8 @@ stop column density 26
 iterate to convergence
 failures 2000 times
 stop temperature off
-c
-c === (3) CHANGE OUTPUT ===
+#
+# === (3) CHANGE OUTPUT ===
 save cooling last ".cool"
 save dr last ".dr"
 save grain D/G ratio last ".ratio"

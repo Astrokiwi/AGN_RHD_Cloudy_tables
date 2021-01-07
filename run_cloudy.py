@@ -11,8 +11,7 @@ import psutil
 import parameter_ranges as pr
 import multiprocessing
 import subprocess
-
-Ncores = 4
+import sys
 
 #%%
 def grep():
@@ -32,17 +31,25 @@ def runcloudy(point):
     print(n,i,t)
     
     os.chdir(f"{pr.directory}/n{n:.0f}/In{i:.1f}/Te{t:.2f}")
-    p = subprocess.run(["cloudy","*in"])
+    p = subprocess.run(["cloudy",f"n{n:.0f}_In{i:.1f}_Te{t:.2f}.in"],text=True,stderr=subprocess.STDOUT)
+    # p = subprocess.run(["ls"], capture_output=True,shell=True,text=True) # shell=True for passing a string
+    # p = subprocess.run(["pwd"], capture_output=True,shell=True,text=True) # shell=True for passing a string
     # p = subprocess.run(["echo hi; sleep 2; echo ho"], capture_output=True,shell=True,text=True) # shell=True for passing a string
 
-    # print(p.stdout)
+    print(p.stdout)
 
     # os.system("cloudy *in &")
 
 
 #%%
 if __name__ == "__main__" :
-    n0, i0, t0 = np.meshgrid(pr.logn, pr.logi, pr.logt)
+    if len(sys.argv)>1:
+        Ncores = int(sys.argv[1])
+    else:
+        Ncores = 4
+
+    n0, i0, t0 = np.meshgrid(pr.logn[0:2], pr.logi[0:2], pr.logt[0:2])
+    # n0, i0, t0 = np.meshgrid(pr.logn, pr.logi, pr.logt)
 
     points = np.array([n0.ravel(), i0.ravel(), t0.ravel()]).T
 
@@ -53,12 +60,3 @@ if __name__ == "__main__" :
     
     PoolReturn = pool.map(runcloudy,points)
 
-#%%
-# c=0
-# n=2
-# t=logt[16]
-# for i in logi:
-#        # for t in logt[10:15]:
-#             os.chdir("{0}n{1}/In{2:.1f}/Te{3:.2f}".format(directory,n,i,t))
-#             c=c+1
-#             os.system("cloudy *in &")

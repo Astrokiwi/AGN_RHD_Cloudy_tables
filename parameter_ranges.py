@@ -1,6 +1,6 @@
 import numpy as np
 
-directory = "/Users/davidjwilliamson/quickscripts/cloudy_tables"
+directory = "/srv/djw1g16/cloudy_tables/test_tables"
 
 # Intensity at the sublimation radius
 I0 = 5.6e7

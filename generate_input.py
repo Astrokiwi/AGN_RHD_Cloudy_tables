@@ -14,8 +14,8 @@ def input_cloudy_simple(I,n,temp,frequencies,template):
 
     g = -2.8 + np.log10(1000)
 
-    file_dir=f'{pr.directory}/n{n}/In{I:.1f}/Te{temp:.2f}/'
-    file_name=f"{file_dir}n{n}_In{I:.1f}_Te{temp:.2f}.in_2"
+    file_dir=f'{pr.directory}/n{n:.0f}/In{I:.1f}/Te{temp:.2f}/'
+    file_name=f"{file_dir}n{n:.0f}_In{I:.1f}_Te{temp:.2f}.in"
 
     with open(file_name, "w") as file:
         file.write(
@@ -23,7 +23,7 @@ def input_cloudy_simple(I,n,temp,frequencies,template):
         )
 
         for inu,nu in enumerate(frequencies):
-            file.write(f'save continuum emissivity {nu} last ".znu{inu}"\n')
+            file.write(f'save continuum emissivity {nu} last units microns ".znu{inu}"\n')
 
 #%%
 

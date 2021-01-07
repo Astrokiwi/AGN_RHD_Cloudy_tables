@@ -1,0 +1,6 @@
+1) Install (modified) Cloudy (tested on 17.02), as `cloudy` in executible path
+2) Edit parameter_ranges.py to
+    a) set (log) ranges of temperature, density, and intensity
+    b) set directory for cloudy tables to reside
+3) `python generate_input.py` to generate directory structure and Cloudy input files
+4) `python run_cloudy.py [P]` to run Cloudy runs in parallel, on `P` processes (default=4)
