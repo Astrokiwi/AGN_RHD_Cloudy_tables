@@ -49,6 +49,7 @@ if __name__=='__main__':
     with open("input_template.txt") as f:
         template = f.read()
 
+    # truncated for test, TODO: remove [0:2] for production
     for n in pr.logn[0:2]:
         for i in pr.logi[0:2]:
             for t in pr.logt[0:2]:
