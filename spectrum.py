@@ -4,6 +4,11 @@ import parameter_ranges as pr
 from astropy import constants
 from astropy import units
 import sys
+import os
+import pandas as pd
+
+import cProfile, pstats, io
+from pstats import SortKey
 
 def logn_to_rho(logn):
     """logn_to_rho(logn)
@@ -66,8 +71,6 @@ class SpectrumInterpolator:
         self.radii  = d[:,0]
         self.depths = d[:,1]
 
-        self.emissivity_matrix = None
-
     def get_spectrum(self,depth):
         """SpectrumInterpolator.get_spectrum(depth)
 
@@ -87,7 +90,7 @@ class SpectrumInterpolator:
 
         return np.array(emissivity)
 
-    def gather_all_spectra(self):
+    def gather_all_spectra(self,chunksize=32):
         """SpectrumInterpolator.gather_all_spectra()
 
         Combines all dumped emissivities and opacities (scattering and absorbed) into 3 big matrices, for quick spectrum plotting
@@ -95,21 +98,27 @@ class SpectrumInterpolator:
         Returns matrices, also saves them as SpectrumInterpolator.emissivity_matrix,SpectrumInterpolator.opac_abs_matrix,SpectrumInterpolator.opac_scat_matrix
         """
         #TODO: proper interpolation. For now just using lower bound
-        emissivity_in = []
-        opac_abs_in = []
-        opac_scat_in = []
+        spec_temp_file = "workspace/tempspec.tmp"
 
-        # for i in range(self.nfiles) :
-        for i in range(self.nfiles-1, -1, -1) : # invert order to get increasing wavelength, not increasing frequency
-            file = f"{self.file_base}{i}"
-            d = np.loadtxt(file, usecols=[2,3,4], skiprows=1)  # load in emissivity and opacity columns, for all depths
-            emissivity_in.append(d[:,0])
-            opac_abs_in.append(d[:,1])
-            opac_scat_in.append(d[:,2])
+        print("concatenating files")
 
-        self.emissivity_matrix = np.array(emissivity_in).T
-        self.opac_abs_matrix = np.array(opac_abs_in).T
-        self.opac_scat_matrix = np.array(opac_scat_in).T
+        for nchars in range(1,4+1):
+            wildcard = "?"*(nchars)
+            if nchars==1:
+                pipe = ">"
+            else:
+                pipe = ">>"
+            #TODO: replace os.system with newer preferred version
+            os.system(f"tail -q -n +2 {self.file_base}{wildcard} | cut -f 3,4,5 {pipe} {spec_temp_file}")
+
+        d = pd.read_csv(spec_temp_file,header=None,sep='\t').values
+
+        # reshape, then flip
+        ndepth = d.shape[0]//self.nfiles
+        self.emissivity_matrix = np.flip(d[:,0].reshape((self.nfiles,ndepth)).T,axis=1)
+        self.opac_abs_matrix = np.flip(d[:,1].reshape((self.nfiles,ndepth)).T,axis=1)
+        self.opac_scat_matrix = np.flip(d[:,2].reshape((self.nfiles,ndepth)).T,axis=1)
+
         return self.emissivity_matrix,self.opac_abs_matrix,self.opac_scat_matrix
 
     def calculate_depths(self,recalculate=False):
@@ -200,6 +209,12 @@ if __name__ == "__main__" :
     import matplotlib as mpl
     mpl.use('Agg')
     import matplotlib.pyplot as plt
+
+    profile = True
+    if profile:
+        prof = cProfile.Profile()
+        prof.enable()
+
     spec = SpectrumInterpolator(1.,10.2,1.)
     print("Initialised!")
     # s=spec.get_spectrum(1.e24)
@@ -215,6 +230,15 @@ if __name__ == "__main__" :
                                         ,spec.weighted_opacity/logn_to_rho(spec.n) #convert to mass units
                                          ]
                                         ).T)
+
+
+    if profile:
+        prof.disable()
+        s = io.StringIO()
+        sortby = SortKey.CUMULATIVE
+        ps = pstats.Stats(prof, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        print(s.getvalue())
 
     # spec.read_incident_transmitted_spectrum()
     #
