@@ -1,16 +1,13 @@
 import numpy as np
 import glob
-import parameter_ranges as pr
+from parameters import parameter_ranges as pr
 from astropy import constants
 from astropy import units
-import sys
 import os
 import pandas as pd
 
 import cProfile, pstats, io
 from pstats import SortKey
-
-import time
 
 import tempfile
 
@@ -125,7 +122,6 @@ class SpectrumInterpolator:
         # this is much faster than using read_csv 8000 times
         with tempfile.NamedTemporaryFile() as tf:
 
-            t0 = time.time()
             for nchars in range(1,4+1):
                 wildcard = "?"*(nchars)
                 if nchars==1:
@@ -134,10 +130,8 @@ class SpectrumInterpolator:
                     pipe = ">>"
                 #TODO: replace os.system with newer preferred version
                 os.system(f"tail -q -n +2 {self.rd.spec_file_base}{wildcard} | cut -f 3,4,5 {pipe} {tf.name}")
-            print(time.time()-t0)
 
             d = pd.read_csv(tf.name,header=None,sep='\t').values
-        print(time.time()-t0)
 
         # reshape, then flip
         ndepth = d.shape[0]//self.nfiles
@@ -231,7 +225,6 @@ class SpectrumInterpolator:
 if __name__ == "__main__" :
     import matplotlib as mpl
     mpl.use('Agg')
-    import matplotlib.pyplot as plt
 
     profile = True
     if profile:

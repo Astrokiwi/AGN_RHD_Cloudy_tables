@@ -8,7 +8,8 @@ Created on Thu Nov  2 15:23:30 2017
 
 import numpy as np
 import os
-import parameter_ranges as pr
+from parameters import parameter_ranges as pr
+
 
 def input_cloudy_simple(I,n,temp,frequencies,template):
 

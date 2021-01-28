@@ -1,10 +1,10 @@
 import extract_spectral_data
-import parameter_ranges as pr
+from parameters import parameter_ranges as pr
 import numpy as np
 import pandas as pd
 from scipy import interpolate
 import time
-import sys
+import multiprocessing
 
 print("imports complete")
 
@@ -47,7 +47,8 @@ def extract_dust(rd):
     dg = dg_matrix[:,-1]
     return pd.DataFrame(np.array([Tdust,dg]).T,columns=["Tdust","dg"])
 
-def extra_one_run(n,i,t):
+def extract_one_run(n,i,t):
+    print(n,i,t)
     rd = RunData(n,i,t)
 
     spec = extract_spectral_data.SpectrumInterpolator(rd)
@@ -60,12 +61,24 @@ def extra_one_run(n,i,t):
 
     df_out = pd.DataFrame()
     for key in df:
-        df_out[key] = interpolate.interp1d(df["tau"],df[key])(pr.table_tau)
+        df_out[key] = interpolate.interp1d(df["tau"],df[key],fill_value="extrapolate")(pr.table_tau)
     return df_out
 
 if __name__ == "__main__" :
+    Ncores = 12
+
+    n0, i0, t0 = np.meshgrid(pr.logn[0 :2], pr.logi[0 :2], pr.logt[0 :2])  # truncated for test
+    # n0, i0, t0 = np.meshgrid(pr.logn, pr.logi, pr.logt)
+
+    points = np.array([n0.ravel(), i0.ravel(), t0.ravel()]).T
+
     t0 = time.time()
-    df_out = extra_one_run(1.,10.2,1.)
+
+    pool = multiprocessing.Pool(Ncores)
+
+    df_list = pool.starmap(extract_one_run, points)
+
     print(time.time()-t0)
-    df_out.to_csv("data/test.txt",sep=" ",index=False)
+
+    # df_out.to_csv("data/test.txt",sep=" ",index=False)
 

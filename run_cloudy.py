@@ -8,7 +8,7 @@ Created on Thu Sep 14 09:53:53 2017
 import numpy as np
 import os
 import psutil
-import parameter_ranges as pr
+from parameters import parameter_ranges as pr
 import multiprocessing
 import subprocess
 import sys
