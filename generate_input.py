@@ -44,9 +44,9 @@ if __name__=='__main__':
 
     #%%
     #Taking a typical sample frequency set
-    frequencies=np.loadtxt('continuum_freq.txt')
+    frequencies=np.loadtxt('parameters/continuum_freq.txt')
 
-    with open("input_template.txt") as f:
+    with open("parameters/input_template.txt") as f:
         template = f.read()
 
     # truncated for test, TODO: remove [0:2] for production
