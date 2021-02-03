@@ -51,9 +51,9 @@ if __name__=='__main__':
         template = f.read()
 
     # truncated for test, TODO: remove [0:2] for production
-    for n in pr.logn[0:2]:
-        for i in pr.logi[0:2]:
-            for t in pr.logt[0:2]:
+    for n in pr.logn:
+        for i in pr.logi:
+            for t in pr.logt:
                 print(n,i,t)
                 input_cloudy_simple(i,n,t,frequencies,template)
 

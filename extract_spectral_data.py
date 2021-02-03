@@ -4,12 +4,15 @@ from parameters import parameter_ranges as pr
 from astropy import constants
 from astropy import units
 import os
+import subprocess
 import pandas as pd
 
-import cProfile, pstats, io
-from pstats import SortKey
+# import cProfile, pstats, io
+# from pstats import SortKey
 
 import tempfile
+
+import time
 
 def logn_to_rho(logn):
     """logn_to_rho(logn)
@@ -118,6 +121,7 @@ class SpectrumInterpolator:
         Returns matrices, also saves them as SpectrumInterpolator.emissivity_matrix,SpectrumInterpolator.opac_abs_matrix,SpectrumInterpolator.opac_scat_matrix
         """
 
+
         # combine all znu files into a single file, for quicker read_csv processing
         # this is much faster than using read_csv 8000 times
         with tempfile.NamedTemporaryFile() as tf:
@@ -128,8 +132,7 @@ class SpectrumInterpolator:
                     pipe = ">"
                 else:
                     pipe = ">>"
-                #TODO: replace os.system with newer preferred version
-                os.system(f"tail -q -n +2 {self.rd.spec_file_base}{wildcard} | cut -f 3,4,5 {pipe} {tf.name}")
+                subprocess.run(f"tail -q -n +2 {self.rd.spec_file_base}{wildcard} | cut -f 3,4,5 {pipe} {tf.name}",shell=True)
 
             d = pd.read_csv(tf.name,header=None,sep='\t').values
 
@@ -246,13 +249,13 @@ if __name__ == "__main__" :
                                         ,spec.weighted_opacity/logn_to_rho(spec.n) #convert to mass units
                                          ]
                                         ).T)
-
-
-    if profile:
-        prof.disable()
-        print(pstats
-                .Stats(prof, stream=io.StringIO())
-                .sort_stats(SortKey.CUMULATIVE)
-                .print_stats()
-                .getvalue()
-              )
+    #
+    #
+    # if profile:
+    #     prof.disable()
+    #     print(pstats
+    #             .Stats(prof, stream=io.StringIO())
+    #             .sort_stats(SortKey.CUMULATIVE)
+    #             .print_stats()
+    #             .getvalue()
+    #           )

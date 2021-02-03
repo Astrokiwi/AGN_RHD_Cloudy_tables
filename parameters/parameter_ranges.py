@@ -24,6 +24,9 @@ table_tau = np.logspace(-2,np.log10(7),50)
 dir_format = '{directory}/n{n:.0f}/In{i:.1f}/Te{t:.2f}/'
 file_format = "n{n:.0f}_In{i:.1f}_Te{t:.2f}"
 
+# key_order = ["n","i","t","arad","Htot","Cool","kabs","kscat","Tdust","dg"]
+key_order = ["arad","Htot","Cool","kabs","kscat","Tdust","dg"]
+
 def format_dir(n,i,t):
     return dir_format.format(directory=directory,n=n,i=i,t=t)
 

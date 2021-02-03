@@ -61,14 +61,17 @@ def extract_one_run(n,i,t):
 
     df_out = pd.DataFrame()
     for key in df:
-        df_out[key] = interpolate.interp1d(df["tau"],df[key],fill_value="extrapolate")(pr.table_tau)
-    return df_out
+        if np.any(df[key]<0):
+            print("<0 in ",n,i,t,key)
+        df_out[key] = interpolate.interp1d(df["tau"],np.log10(df[key]),fill_value="extrapolate")(pr.table_tau)
+    df_out["tau"] = pr.table_tau
+    return n,i,t,df_out
 
-if __name__ == "__main__" :
-    Ncores = 12
+def full_run(alln,alli,allt,key_order=None,Ncores=4):
+    if key_order is None:
+        key_order = pr.key_order
 
-    n0, i0, t0 = np.meshgrid(pr.logn[0 :2], pr.logi[0 :2], pr.logt[0 :2])  # truncated for test
-    # n0, i0, t0 = np.meshgrid(pr.logn, pr.logi, pr.logt)
+    n0, i0, t0 = np.meshgrid(alln,alli,allt)
 
     points = np.array([n0.ravel(), i0.ravel(), t0.ravel()]).T
 
@@ -78,7 +81,37 @@ if __name__ == "__main__" :
 
     df_list = pool.starmap(extract_one_run, points)
 
-    print(time.time()-t0)
+    full_df = pd.DataFrame()
+    print(time.time() - t0)
 
-    # df_out.to_csv("data/test.txt",sep=" ",index=False)
+    nit_table = []
 
+    for n,i,t,df in df_list:
+        df["n"] = np.full(len(df),n)
+        df["i"] = np.full(len(df),i)
+        df["t"] = np.full(len(df),t)
+        full_df = full_df.append(df)
+
+
+    with open("data/table_key.txt",'w') as keyf:
+        keyf.write(f"{len(pr.table_tau)} {len(alln)} {len(alli)} {len(allt)}\n")
+        for t in [pr.table_tau,alln,alli,allt]:
+            for i in t:
+                keyf.write(f"{i}\n")
+
+    full_df.sort_values(by=["n","i","t"],inplace=True)
+    full_df = full_df[key_order]
+
+    print(time.time() - t0)
+    full_df.to_csv("data/full_test.txt",sep=" ",index=False)
+    print(time.time() - t0)
+
+def test_run():
+    t0 = time.time()
+    df_out = extract_one_run(pr.logn[1], pr.logi[0], pr.logt[0])
+    print(time.time() - t0)
+    df_out.to_csv("data/test.txt",sep=" ",index=False)
+
+if __name__ == "__main__" :
+    # test_run()
+    full_run(pr.logn[0 :2], pr.logi[0 :2], pr.logt[0 :2],Ncores=12) # truncated for test
