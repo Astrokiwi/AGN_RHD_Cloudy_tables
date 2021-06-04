@@ -1,4 +1,4 @@
-1) Install (modified) Cloudy (tested on 17.02), as `cloudy` in executible path
+1) Install (modified) Cloudy (tested on 17.02), as `cloudy` in executible path (`https://gitlab.nublado.org/cloudy/cloudy/-/wikis/StepByStep`)
 2) Edit parameter_ranges.py to
     a) set (log) ranges of temperature, density, and intensity
     b) set directory for cloudy tables to reside
